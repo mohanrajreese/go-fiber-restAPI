@@ -57,11 +57,35 @@ func (r *Repository) GetBooks(c *fiber.Ctx) error {
 	return nil
 }
 
+func (r *Repository) DeleteBook(c *fiber.Ctx) error {
+	bookModel := models.Books{}
+	id := c.Params("id")
+	if id == "" {
+		err := c.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+			"message": "id cannot be empty",
+		})
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	err := r.DB.Delete(bookModel, id)
+	if err.Error != nil {
+		c.Status(http.StatusBadRequest).JSON(&fiber.Map{
+			"message": "could not delete the book",
+		})
+		return err.Error
+	}
+	c.Status(http.StatusOK).JSON(&fiber.Map{
+		"message": "Book Deleted Successfully",
+	})
+}
+
 func (r *Repository) SetupRoutes(app *fiber.App) {
 	v1 := app.Group("/v1/api")
 	v1.Post("/create_book", r.CreateBook)
-	//v1.Delete("/delete/:id", r.DeleteBook)
-	//v1.Get("get_book/:id", r.GetBooksByID)
+	v1.Delete("/delete/:id", r.DeleteBook)
+	v1.Get("get_book/:id", r.GetBooksByID)
 	v1.Get("/books", r.GetBooks)
 }
 
