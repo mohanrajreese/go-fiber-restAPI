@@ -5,9 +5,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 	"go-fiber-api/models"
+	"go-fiber-api/storage"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
+	"os"
 )
 
 type Book struct {
@@ -58,8 +60,8 @@ func (r *Repository) GetBooks(c *fiber.Ctx) error {
 func (r *Repository) SetupRoutes(app *fiber.App) {
 	v1 := app.Group("/v1/api")
 	v1.Post("/create_book", r.CreateBook)
-	v1.Delete("/delete/:id", r.DeleteBook)
-	v1.Get("get_book/:id", r.GetBooksByID)
+	//v1.Delete("/delete/:id", r.DeleteBook)
+	//v1.Get("get_book/:id", r.GetBooksByID)
 	v1.Get("/books", r.GetBooks)
 }
 
@@ -67,6 +69,14 @@ func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal(err)
+	}
+	config := &storage.Config{
+		Host:     os.Getenv("DB_HOST"),
+		Port:     os.Getenv("DB_PORT"),
+		Password: os.Getenv("DB_PASS"),
+		User:     os.Getenv("DB_USER"),
+		SSLMode:  os.Getenv("DB_SSLMODE"),
+		DBName:   os.Getenv("DB_NAME"),
 	}
 
 	db, errr := storage.NewConnection(config)
